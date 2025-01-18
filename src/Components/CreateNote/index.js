@@ -2,135 +2,111 @@ import Layout from "../Layout";
 import { useForm } from "react-hook-form";
 import TagInput from "../TagInput";
 import { useEffect, useState } from "react";
-import { createNote } from "../../Utils/endpoints";
-
+import { notesUrl } from "../../Utils/endpoints";
+import { useNavigate } from "react-router-dom";
 export default function CreateNote() {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
   } = useForm();
-  const [tags, setTags] = useState([]);
-  useEffect(() => {
-    setValue("tags", tags);
-  }, [tags]);
-  function onSubmit(data) {
-    fetch(createNote, {
+  const onSubmit = (data) => {
+    console.log("data ", data);
+    fetch(notesUrl, {
       method: "POST",
       headers: {
         Accept: "application/json",
-        "Content-type": "application/json",
+        "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify(data),
     })
       .then((res) => res.json())
-      .then((data) => console.log("result: ", data));
-  }
+      .then((d) => {
+        if (d.ok) {
+          navigate("/home");
+        }
+      });
+  };
+  const [tags, setTags] = useState([]);
+  const [minDate, setMinDate] = useState("");
+  console.log("min", minDate);
+  useEffect(() => {
+    const now = new Date();
+    setMinDate(now.toISOString().slice(0, 16));
+  }, []);
+  useEffect(() => {
+    setValue("tags", tags);
+  }, [tags]);
   return (
     <Layout>
-      <div className="font-bold text-lg">Create Note</div>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="mt-8 flex">
-          <div className="w-1/2 flex flex-col gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-sm text-slate-700 font-semibold">
-                Title
-              </label>
-              <input
-                {...register("title", {
-                  required: {
-                    value: true,
-                    message: "Title is required",
-                  },
-                })}
-                placeholder="Enter Title"
-                className="px-2 py-1 border border-slate-500 rounded-md shadow-md placeholder:text-sm"
-              />
+      <div className="font-bold text-lg mt-4">Create New Note</div>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="mt-4 flex flex-col gap-2"
+      >
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-slate-600">Title</label>
+          <input
+            {...register("title", {
+              required: {
+                value: true,
+                message: "Title is required",
+              },
+            })}
+            placeholder="Enter Title"
+            className="px-2 py-1 border border-slate-500 rounded-md shadow-md placeholder:text-sm"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-slate-600">Description</label>
+          <textarea
+            {...register("description", {
+              required: {
+                value: true,
+                message: "Description is required",
+              },
+            })}
+            placeholder="Enter Description"
+            rows={5}
+            className="px-2 py-1 border border-slate-500 rounded-md shadow-md placeholder:text-sm"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-slate-600">Due Date</label>
+          <input
+            type="datetime-local"
+            {...register("dueDate")}
+            min={minDate}
+            className="px-2 py-1 border border-slate-500 rounded-md shadow-md placeholder:text-sm"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-slate-600">Category</label>
+          <div className="flex gap-2">
+            <div className="flex items-center gap-1">
+              <input type="radio" value="Work" {...register("category")} />
+              <span className="text-sm">Work</span>
             </div>
-            <div className="flex flex-col gap-1 ">
-              <label className="text-sm text-slate-700 font-semibold">
-                Description
-              </label>
-              <textarea
-                {...register("description", {
-                  required: {
-                    value: true,
-                    message: "Title is required",
-                  },
-                })}
-                rows={5}
-                placeholder="Enter Description"
-                className="px-2 py-1 border border-slate-500 rounded-md shadow-md placeholder:text-sm"
-              />
+            <div className="flex items-center gap-1">
+              <input type="radio" value="Personal" {...register("category")} />
+              <span className="text-sm">Personal</span>
             </div>
-            <div className="flex flex-col gap-1 ">
-              <label className="text-sm text-slate-700 font-semibold">
-                Tags
-              </label>
-              <TagInput tags={tags} setTags={setTags} />
-            </div>
-            <div className="flex flex-col gap-1 ">
-              <label className="text-sm text-slate-700 font-semibold">
-                Due Date
-              </label>
-              <input
-                type="date"
-                {...register("dueDate", {
-                  required: {
-                    value: true,
-                    message: "Title is required",
-                  },
-                })}
-                className="px-2 py-1 border border-slate-500 rounded-md shadow-md placeholder:text-sm"
-              />
-            </div>
-            <div className="flex flex-col gap-1 ">
-              <label className="text-sm text-slate-700 font-semibold">
-                Category
-              </label>
-              <div className="flex gap-2">
-                <div className="flex items-center">
-                  <label>
-                    <input
-                      value="Work"
-                      type="radio"
-                      {...register("date")}
-                      className=""
-                    />
-                    <span className="ml-2 text-sm">Work</span>
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <label>
-                    <input
-                      type="radio"
-                      value="Personal"
-                      {...register("date")}
-                      className=""
-                    />
-                    <span className="ml-2 text-sm">Personal</span>
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <label>
-                    <input
-                      type="radio"
-                      value="School"
-                      {...register("date")}
-                      className=""
-                    />
-                    <span className="ml-2 text-sm">School</span>
-                  </label>
-                </div>
-              </div>
+            <div className="flex items-center gap-1">
+              <input type="radio" value="School" {...register("category")} />
+              <span className="text-sm">School</span>
             </div>
           </div>
         </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-slate-600">Tags</label>
+          <TagInput tags={tags} setTags={setTags} />
+        </div>
         <button
           type="submit"
-          className="w-1/2 mt-4 bg-slate-800 text-white py-1 rounded-md "
+          className="text-white bg-slate-800 px-2 py-1 rounded-md"
         >
           Submit
         </button>

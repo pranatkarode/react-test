@@ -1,12 +1,13 @@
 import Footer from "../Footer";
 import Header from "../Header";
-
-export default function Layout({ children }) {
+import { memo } from "react";
+const Layout = memo(({ children }) => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="px-24 py-4 grow flex flex-col">{children}</div>
+      <div className="px-24 grow py-4">{children}</div>
       <Footer />
     </div>
   );
-}
+});
+export default Layout;

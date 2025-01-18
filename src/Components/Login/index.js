@@ -8,9 +8,10 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState(null);
   const { handleSubmit, register } = useForm();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const onSubmit = (data) => {
-    setLoading(true);
+    setIsLoading(true);
     fetch(loginUser, {
       method: "POST",
       body: JSON.stringify(data),
@@ -23,7 +24,6 @@ export default function Login() {
         return res.json();
       })
       .then((d) => {
-        setLoading(false);
         console.log(d);
         if (!d.ok && !d.token) {
           setErrorMessage(d.msg);
@@ -31,15 +31,16 @@ export default function Login() {
           localStorage.setItem("token", d.token);
           navigate("/home");
         }
+        setIsLoading(false);
       })
-
       .catch((err) => {
+        setIsLoading(false);
         console.log(err);
       });
   };
   return (
     <div className="flex justify-center items-center h-screen p-8">
-      <div className="border border-slate-900 rounded-md p-8 md:p-16 w-full sm:w-[60%]  lg:w-1/3 ">
+      <div className="border border-slate-900 rounded-md p-8 lg:p-16 w-full lg:w-[70%] xl:w-1/3 ">
         <div className="text-xl font-bold mb-8">Login To Your Account</div>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
@@ -78,9 +79,9 @@ export default function Login() {
           <button
             className="text-white bg-slate-800 py-2 rounded-md h-[40px]"
             type="submit"
-            disabled={loading}
+            disabled={isLoading}
           >
-            {loading ? <Loader /> : "Login"}
+            {isLoading ? <Loader /> : "Login"}
           </button>
           <div>
             <a
